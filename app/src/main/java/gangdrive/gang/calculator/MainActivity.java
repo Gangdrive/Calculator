@@ -7,6 +7,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Scriptable;
+
 public class MainActivity extends AppCompatActivity {
 
     Button btn0, btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9,
@@ -17,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
 
     String process;
     Boolean checkBrackets = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,6 +115,13 @@ public class MainActivity extends AppCompatActivity {
                 tvInput.setText(process + "8");
             }
         });
+        btn9.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                process = tvInput.getText().toString();
+                tvInput.setText(process + "9");
+            }
+        });
         btnPrecent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -153,13 +164,6 @@ public class MainActivity extends AppCompatActivity {
                 tvInput.setText(process + "+");
             }
         });
-        btnEqually.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                process = tvInput.getText().toString();
-                tvInput.setText(process + "=");
-            }
-        });
         btnClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -186,6 +190,31 @@ public class MainActivity extends AppCompatActivity {
                     tvInput.setText(process + "(");
                     checkBrackets = true;
                 }
+            }
+        });
+
+        btnEqually.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                process = tvInput.getText().toString();
+
+                process = process.replaceAll("x", "*");
+                process = process.replaceAll("%", "/100");
+                process = process.replaceAll("/", "/");
+
+                Context rhino = Context.enter();
+                rhino.setOptimizationLevel(-1);
+                String finalResult = "";
+
+                try{
+                    Scriptable scriptable = rhino.initStandardObjects();
+                    finalResult = rhino.evaluateString(scriptable,process,"javaScript", 1, null).toString();
+
+                }
+                catch (Exception e){
+                   finalResult = "0";
+                }
+                tvOutput.setText(finalResult);
             }
         });
 
